@@ -14,7 +14,7 @@
 
 ; ball settings
 (def ball-width 10)
-(def ball-speed 5)
+(def ball-speed 8)
 
 (defn make-paddle [x y]
   {:x x :y y :w paddle-width :h paddle-height})
@@ -112,7 +112,12 @@
   (when (rect-intersects @ai-paddle @ball)
     (let [t (hit-factor @ai-paddle @ball)]
       ; invert the x direction, set y direction to hit factor
-      (swap! ball-dir (fn [[x _]] [(- x) t])))))
+      (swap! ball-dir (fn [[x _]] [(- x) t]))))
+
+  ; move AI paddle
+  (swap! ai-paddle update-in [:y]
+         (fn [_] (- (:y @ball)
+                    (/ paddle-height 2)))))
 
 (defn draw []
   (q/background 0)
