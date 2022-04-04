@@ -23,6 +23,8 @@
 (def ball-dir (atom [2 0]))
 (def ball (atom {:x 215 :y 105 :w 10 :h 10}))
 
+(def score (atom {:player 0 :ai 0}))
+
 (defn hit-factor [p b]
   (- (/ (- (:y b) (:y p))
         (:h p))
@@ -31,6 +33,9 @@
 (defn move-ball [ball [dx dy]]
   (assoc ball :x (+ (:x ball) dx)
               :y (+ (:y ball) dy)))
+
+(defn reset-ball [ball]
+  (assoc ball :x 215 :y 105))
 
 (defn draw-rec [r]
   (q/rect (:x r) (:y r) (:w r) (:h r)))
@@ -74,6 +79,10 @@
            (is-above? b p)
            (is-below? b p))))
 
+(defn inc-score [paddle]
+  (swap! score update-in [paddle] inc)
+  (swap! ball reset-ball))
+
 (defn update-game []
   (swap! ball move-ball @ball-dir)
 
@@ -81,6 +90,13 @@
   (when (or (< (:y @ball) 0)
             (> (:y @ball) screen-height))
     (swap! ball-dir (fn [[x y]] [x (- y)])))
+
+  ; did the ball hit the left or right border?
+  (cond
+    (< (:x @ball) 0)
+      (inc-score :ai)
+    (> (:x @ball) screen-width)
+      (inc-score :player))
 
   ; ball hits player paddle
   (when (rect-intersects @player-paddle @ball)
@@ -99,7 +115,9 @@
   (q/fill 0xff)
   (draw-rec @player-paddle)
   (draw-rec @ai-paddle)
-  (draw-rec @ball))
+  (draw-rec @ball)
+  (q/text (str (:player @score)) 200 20)
+  (q/text (str (:ai @score)) 250 20))
 
 (defn run []
   (update-game)
