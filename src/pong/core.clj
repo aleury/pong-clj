@@ -12,6 +12,10 @@
 (def paddle-height 70)
 (def paddle-speed 15)
 
+; ball settings
+(def ball-width 10)
+(def ball-speed 5)
+
 (defn make-paddle [x y]
   {:x x :y y :w paddle-width :h paddle-height})
 
@@ -20,8 +24,8 @@
 (def ai-paddle (atom (make-paddle (- screen-width horizontal-padding paddle-width)
                                   65)))
 
-(def ball-dir (atom [2 0]))
-(def ball (atom {:x 215 :y 105 :w 10 :h 10}))
+(def ball-dir (atom [ball-speed 0]))
+(def ball (atom {:x 215 :y 105 :w ball-width :h ball-width}))
 
 (def score (atom {:player 0 :ai 0}))
 
@@ -88,7 +92,7 @@
 
   ; ball hit top or bottom border?
   (when (or (< (:y @ball) 0)
-            (> (:y @ball) screen-height))
+            (> (:y @ball) (- screen-height ball-width)))
     (swap! ball-dir (fn [[x y]] [x (- y)])))
 
   ; did the ball hit the left or right border?
